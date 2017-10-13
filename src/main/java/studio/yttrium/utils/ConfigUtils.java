@@ -32,6 +32,8 @@ public class ConfigUtils {
                     e.printStackTrace();
                 }
             }
+        }else {
+            file = new File(ConstantValue.getConfigPath());
         }
         return file;
     }

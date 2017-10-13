@@ -63,7 +63,7 @@ public class ConstantValue {
             webInfPath = Thread.currentThread().getContextClassLoader().getResource("/").toString();
             webInfPath = webInfPath.replace('/', '\\'); // 将/换成\
             webInfPath = webInfPath.replace("file:", ""); //去掉file:
-            webInfPath = webInfPath.replace("classes\\", ""); //去掉class\(我这里不需要)
+//            webInfPath = webInfPath.replace("classes\\", ""); //去掉class\(我这里不需要)
             webInfPath = webInfPath.substring(1); //去掉第一个\,如 \D:\JavaWeb...
         }
         return webInfPath;
@@ -75,7 +75,7 @@ public class ConstantValue {
      * @return
      */
     public static String getConfigPath() {
-        return getRootPath() + "config.properties";
+        return getWebInfPath() + "config.properties";
     }
 
     /**
@@ -84,7 +84,7 @@ public class ConstantValue {
      * @return
      */
     public static String getXmlPath() {
-        return getRootPath() + "viewConfig.xml";
+        return getWebInfPath() + "viewConfig.xml";
     }
 
     /**
@@ -93,7 +93,7 @@ public class ConstantValue {
      * @return
      */
     public static String getBlogPath() {
-        return getRootPath() + "blog";
+        return getWebInfPath() + "blog";
     }
 
     /**
@@ -102,7 +102,7 @@ public class ConstantValue {
      * @return
      */
     public static String getImgPath() {
-        return getRootPath() + "img";
+        return getWebInfPath() + "img";
     }
 
     /**
