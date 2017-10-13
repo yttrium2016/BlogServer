@@ -33,7 +33,13 @@
 <div class="site-wrapper">
 
 <#--背景-->
-    <header class="main-header" style="background-image: url(${bj_url ! '/img/index_wallpaper.jpg'})">
+<#if imgUrl == '' >
+    <header class="main-header no-cover " >
+</#if>
+
+<#if imgUrl != '' >
+    <header class="main-header" style="background-image: url(${imgUrl ! '/img/index_wallpaper.jpg'})">
+</#if>
     <#if navs?? && (navs?size > 0) >
         <nav class="main-nav overlay clearfix">
 
@@ -54,7 +60,7 @@
 
 
     <footer class="site-footer clearfix">
-        <section class="copyright"><a href="#">${blogName ! '博客标题'}</a> &copy; 2017</section>
+        <section class="copyright"><a href="${blogUrl ! '#'}">${blogName ! '博客标题'}</a> &copy; 2017</section>
     </footer>
 
 </div>

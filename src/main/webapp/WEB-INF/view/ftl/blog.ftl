@@ -6,7 +6,7 @@
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
-    <title>${title ! "标题"}</title>
+    <title>${blog.title ! "标题"}</title>
     <meta name="description" content=""/>
 
     <meta name="HandheldFriendly" content="True"/>
@@ -45,7 +45,7 @@
 
 <#-- 没有图片加上no-cover这个class 有图片 就没有了 加上style -->
 <#-- post-head 半高北京-->
-    <header class="main-header post-head" style="background-image: url(http://www.yttrium2016.cn/content/images/2017/06/---1.jpg)">
+    <header class="main-header no-cover" >
     <#if navs?? && (navs?size > 0) >
         <nav class="main-nav overlay clearfix">
 
@@ -58,9 +58,9 @@
         <article class="post">
 
             <header class="post-header">
-                <h1 class="post-title">${title ! "标题"}</h1>
+                <h1 class="post-title">${blog.title ! "标题"}</h1>
                 <section class="post-meta">
-                    <time class="post-date" datetime="${dateTemp ! '时间'}">${dateTemp ! '时间'}</time>
+                    <time class="post-date" datetime="${blog.time ! '时间'}">${blog.time ! '时间'}</time>
                 </section>
             </header>
 
@@ -76,12 +76,12 @@
             <#-- 图标 -->
                 <figure class="author-image">
                     <a class="img" href="#y"
-                       style="background-image: url(http://www.yttrium2016.cn/content/images/2017/06/---.jpg)"><span
+                       style="background-image: url(/img/zc_logo.jpg)"><span
                             class="hidden">杨振宇的头像</span></a>
                 </figure>
 
                 <section class="author">
-                    <h4><a href="#y">杨振宇</a></h4>
+                    <h4><a href="#y">${blog.author ! '作者'}</a></h4>
 
                     <p>继续阅读此作者的<a href="#y">更多文章</a>。</p>
                     <div class="author-meta">
@@ -123,7 +123,7 @@
 
 
     <footer class="site-footer clearfix">
-        <section class="copyright"><a href="http://www.yttrium2016.cn">全栈工程师 修炼指南</a> &copy; 2017</section>
+        <section class="copyright"><a href="${blogUrl ! '#'}">${blogName ! '博客标题'}</a> &copy; 2017</section>
     </footer>
 
 </div>
@@ -134,7 +134,36 @@
 <script src="/js/blog.js"></script>
 <script src="/js/markdown.js"></script>
 <script>
+    //从这开始自己写的
+    $(function () {
+        $.ajax({
+            type: "post",
+            async: true,
+            url: "/getBlog.do",
+            dataType: "text",
+            data: {
+                id: GetQueryString('id')
+            },
+            success: function (data) {
+                var html = data;
+                ${js ! ''} //html = markdown.toHTML(html);
+                $('#content').append(html);
+            }
+            , error: function (data) {
+                console.log("/getBlog.do请求error");
+                console.log(data);
+            }
+        });
 
+    });
+
+
+    function GetQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
 </script>
 
 </body>

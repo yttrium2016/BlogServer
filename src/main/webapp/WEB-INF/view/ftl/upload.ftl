@@ -14,13 +14,15 @@
     <legend>图片上传</legend>
     <h2>只能上传单张10M以下的 PNG、JPG、GIF 格式的图片</h2>
     <form action="/uploadImg.do" method="post" enctype="multipart/form-data">
-        选择文件:<input type="file" onchange="fileChange(this);" name="file">
+        选择文件:<input id="file" type="file" onchange="fileChange(this);" name="file">
         <input type="submit" value="上传">
+
     </form>
+    <button onclick="javascript:document.getElementById('file').click();">ajax提交试试看</button>
 
 </fieldset>
 
-<button onclick="upload();">ajax提交试试看</button>
+
 
 <script src="/js/jquery-3.2.1.js"></script>
 <script>
@@ -30,7 +32,7 @@
             url: "/uploadImg.do",
             type: 'POST',
             data: formData,
-            async: false,
+            async: true,
             cache: false,
             contentType: false,
             processData: false,
@@ -41,13 +43,15 @@
                 alert(data);
             }
         });
+        return false;
     }
 
     function fileChange(d) {
         var data = $(d).val();
         if (data != null && data != '') {
             console.log(d);
-            alert();
+//            alert(data);
+            upload();
         }
     }
 </script>

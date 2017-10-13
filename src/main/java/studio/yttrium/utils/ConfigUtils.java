@@ -1,6 +1,5 @@
 package studio.yttrium.utils;
 
-import org.junit.Test;
 import studio.yttrium.constant.ConstantValue;
 
 import java.io.File;
@@ -18,11 +17,6 @@ import java.util.Properties;
  */
 public class ConfigUtils {
 
-    @Test
-    public void test() throws IOException {
-        String aaa = getString("username", "");
-        System.out.println(getProp() + "," + aaa);
-    }
 
     private static Properties prop = null;
     private static File file = null;
@@ -67,11 +61,10 @@ public class ConfigUtils {
 
     public static boolean getBoolean(String key, boolean defValue) {
         String is = getProp().getProperty(key);
-        if ("true".equals(is)) {
-            return true;
-        } else {
-            return false;
+        if (StringUtils.isBlank(is)){
+            return defValue;
         }
+        return "true".equals(is);
     }
 
     public static void putBoolean(String key, boolean value) {

@@ -1,6 +1,5 @@
 package studio.yttrium.utils;
 
-import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -23,7 +22,6 @@ public class JGitUtils {
 
     @Test
     public void test() throws IOException, GitAPIException {
-        initGitRepository();
     }
 
     /**
@@ -31,21 +29,28 @@ public class JGitUtils {
      */
     private static Git git = null;
 
+
+    private static String localTemp = null;
+
     /**
      * 获取git对象
      *
      * @return
      */
-    public static Git getGit() {
+    public static Git getGit(String localFile) {
         //git仓库地址
-        if (git == null) {
-            try {
-                git = Git.open(new File(ConstantValue.getGitPath() + "/.git"));
-            } catch (IOException e) {
-                System.out.println("本地仓库不存在" + e.getMessage());
-                e.printStackTrace();
-                new RuntimeException(e);
+        try {
+            if (!localFile.equals(localTemp)) {
+                if (git != null)
+                    git.close();
+                git = Git.open(new File(localFile + "/.git"));
+                localTemp = localFile;
             }
+        } catch (IOException e) {
+            System.out.println("本地仓库不存在" + e.getMessage());
+            e.printStackTrace();
+            new RuntimeException(e);
+            return null;
         }
         return git;
     }
@@ -54,17 +59,12 @@ public class JGitUtils {
     /**
      * 初始化本地git仓库 有就删掉
      */
-    public static void initGitRepository() {
-        File file = new File(ConstantValue.getGitPath());
+    public static boolean initGitRepository(String localFile, String gitUrl, String username, String password) {
+        gitClose();
+        File file = new File(localFile);
         FileUtils.deleteAllFilesOfDir(file);
-        cloneRepository(ConstantValue.getGitPath());
-    }
-
-    /**
-     * 下载仓库 从默认地址
-     */
-    public static void cloneRepository() {
-        cloneRepository(ConstantValue.getGitPath());
+        cloneRepository(localFile, gitUrl, username, password);
+        return true;
     }
 
     /**
@@ -74,7 +74,7 @@ public class JGitUtils {
      * @throws GitAPIException
      * @throws RuntimeException
      */
-    public static void cloneRepository(String localPath) {
+    public static void cloneRepository(String localPath, String gitUrl, String username, String password) {
         File file = new File(localPath);
         if (file.exists()) {
             if (file.isDirectory()) {
@@ -91,19 +91,14 @@ public class JGitUtils {
             file.mkdir();
         }
 
-        //设置远程服务器上的用户名和密码
+        //设置远程服务器上的用户名和密码 (可以不用)
         UsernamePasswordCredentialsProvider usernamePasswordCredentialsProvider = new
-                UsernamePasswordCredentialsProvider(
-                ConfigUtils.getString(ConstantValue.GIT_USERNAME, ""),
-                ConfigUtils.getString(ConstantValue.GIT_PASSWORD, ""));
+                UsernamePasswordCredentialsProvider(username, password);
 
         //克隆代码库命令
-
-        CloneCommand cloneCommand = Git.cloneRepository();
-
         Git git = null;
         try {
-            git = cloneCommand.setURI(ConfigUtils.getString(ConstantValue.GIT_ADDRESS, "")) //设置远程URI
+            git = Git.cloneRepository().setURI(gitUrl) //设置远程URI
                     .setBranch("master") //设置clone下来的分支
                     .setDirectory(file) //设置下载存放路径
                     .setCredentialsProvider(usernamePasswordCredentialsProvider) //设置权限验证
@@ -126,14 +121,16 @@ public class JGitUtils {
      * @throws IOException
      * @throws GitAPIException
      */
-    public static void gitAdd(String fileName) {
+    public static boolean gitAdd(String localFile,String fileName) {
         //提交代码
         try {
-            getGit().add().addFilepattern(fileName).call();
+            getGit(localFile).add().addFilepattern(fileName).call();
+            return true;
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git add " + fileName + "失败" + e.getMessage());
             new RuntimeException(e);
+            return false;
         }
     }
 
@@ -145,14 +142,16 @@ public class JGitUtils {
      * @throws GitAPIException
      * @throws JGitInternalException
      */
-    public static void gitCommit(String message) {
+    public static boolean gitCommit(String localFile,String message) {
         //提交代码
         try {
-            getGit().commit().setAll(true).setMessage(message).call();
+            getGit(localFile).commit().setAll(true).setMessage(message).call();
+            return true;
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git commit " + message + "失败" + e.getMessage());
             new RuntimeException(e);
+            return false;
         }
 
     }
@@ -164,14 +163,16 @@ public class JGitUtils {
      * @throws IOException
      * @throws GitAPIException
      */
-    public static void gitRemove(String fileName) {
+    public static boolean gitRemove(String localFile,String fileName) {
         //提交代码
         try {
-            getGit().rm().addFilepattern(fileName).call();
+            getGit(localFile).rm().addFilepattern(fileName).call();
+            return true;
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git rm " + fileName + "失败" + e.getMessage());
             new RuntimeException(e);
+            return false;
         }
     }
 
@@ -181,19 +182,19 @@ public class JGitUtils {
      * @throws IOException
      * @throws GitAPIException
      */
-    public static void gitPush() {
+    public static boolean gitPush(String localFile,String username, String password) {
 
         UsernamePasswordCredentialsProvider usernamePasswordCredentialsProvider = new
-                UsernamePasswordCredentialsProvider(
-                ConfigUtils.getString(ConstantValue.GIT_USERNAME, ""),
-                ConfigUtils.getString(ConstantValue.GIT_PASSWORD, ""));
+                UsernamePasswordCredentialsProvider(username, password);
 
         try {
-            getGit().push().setRemote("origin").setCredentialsProvider(usernamePasswordCredentialsProvider).call();
+            getGit(localFile).push().setRemote("origin").setCredentialsProvider(usernamePasswordCredentialsProvider).call();
+            return true;
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git push 失败" + e.getMessage());
             new RuntimeException(e);
+            return false;
         }
     }
 
@@ -203,13 +204,15 @@ public class JGitUtils {
      * @throws IOException
      * @throws GitAPIException
      */
-    public static void gitCheckout() {
+    public static boolean gitCheckout(String localFile) {
         try {
-            getGit().checkout().setAllPaths(true).call();
+            getGit(localFile).checkout().setAllPaths(true).call();
+            return true;
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git checkout 失败" + e.getMessage());
             new RuntimeException(e);
+            return false;
         }
     }
 
@@ -219,18 +222,23 @@ public class JGitUtils {
      * @param fileName
      * @param message
      */
-    public static void addCommitPush(String fileName, String message) {
+    public static boolean addCommitPush(String localFile,String fileName, String message, String username, String password) {
         //更新远端
-        gitCheckout();
-
+        if(!gitCheckout(localFile))
+            return false;
         //本地添加
-        gitAdd(fileName);
+        if(!gitAdd(localFile,fileName))
+            return false;
 
         //提交代码
-        gitCommit(message);
+        if(!gitCommit(localFile,message))
+            return false;
 
         //推送
-        gitPush();
+        if(!gitPush(localFile,username, password))
+            return false;
+
+        return true;
     }
 
     /**
@@ -239,18 +247,24 @@ public class JGitUtils {
      * @param fileName
      * @param message
      */
-    public static void removeCommitPush(String fileName, String message) {
+    public static boolean removeCommitPush(String localFile,String fileName, String message, String username, String password) {
         //更新远端
-        gitCheckout();
+        if(!gitCheckout(localFile))
+            return false;
 
         //本地添加
-        gitRemove(fileName);
+        if(!gitRemove(localFile,fileName))
+            return false;
 
         //提交代码
-        gitCommit(message);
+        if(!gitCommit(localFile,message))
+            return false;
 
         //推送
-        gitPush();
+        if(!gitPush(localFile,username, password))
+            return false;
+
+        return true;
     }
 
     /**
@@ -258,7 +272,7 @@ public class JGitUtils {
      */
     public static void deleteRepository() {
         gitClose();
-        File file = new File(ConstantValue.getGitPath());
+        File file = new File(ConstantValue.getBlogPath());
         FileUtils.deleteAllFilesOfDir(file);
     }
 
@@ -267,10 +281,10 @@ public class JGitUtils {
      * 关闭Git占用 用于删除
      */
     public static void gitClose() {
-        if (getGit() != null) {
-            getGit().close();
-            git = null;
-        }
+        if (git != null)
+            git.close();
+        git = null;
+        localTemp = null;
     }
 
 }

@@ -1,6 +1,7 @@
 package studio.yttrium.pojo;
 
 /**
+ * 默认返回实体类
  * Created with IntelliJ IDEA
  * Created By 杨振宇
  * Date: 2017/8/16
@@ -8,11 +9,13 @@ package studio.yttrium.pojo;
  */
 public class DefaultResult {
 
-    private int resultCode;
+    private int resultCode; //1.成功 0.失败
 
-    private Object resultData;
+    private Object resultData; //数据内容
 
-    private String resultMessage;
+    private String resultMessage; //返回信息
+
+    private String resultUrl; //返回信息
 
     public int getResultCode() {
         return resultCode;
@@ -26,6 +29,10 @@ public class DefaultResult {
         return resultMessage;
     }
 
+    public String getResultUrl() {
+        return resultUrl;
+    }
+
     public void setResultCode(int resultCode) {
         this.resultCode = resultCode;
     }
@@ -36,5 +43,9 @@ public class DefaultResult {
 
     public void setResultMessage(String resultMessage) {
         this.resultMessage = resultMessage;
+    }
+
+    public void setResultUrl(String resultUrl) {
+        this.resultUrl = resultUrl;
     }
 }

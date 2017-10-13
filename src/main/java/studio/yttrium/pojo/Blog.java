@@ -1,6 +1,7 @@
 package studio.yttrium.pojo;
 
 /**
+ * 博客实体类
  * Created with IntelliJ IDEA
  * Created By 杨振宇
  * Date: 2017/8/29
@@ -16,6 +17,7 @@ public class Blog {
     private String time;
     private String webUrl;
     private String author;
+    private String suffix;
 
     public String getId() {
         return id;
@@ -49,6 +51,10 @@ public class Blog {
         return author;
     }
 
+    public String getSuffix() {
+        return suffix;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -79,5 +85,9 @@ public class Blog {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
     }
 }

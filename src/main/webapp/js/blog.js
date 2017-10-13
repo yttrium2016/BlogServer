@@ -54,34 +54,3 @@
 
     };
 })(jQuery);
-
-
-//从这开始自己写的
-$(function () {
-    $.ajax({
-        type: "post",
-        async: true,
-        url: "/getBlog.do",
-        dataType: "text",
-        data: {
-            id: GetQueryString('id')
-        },
-        success: function (data) {
-            var html = markdown.toHTML(data);
-            $('#content').append(html);
-        }
-        , error: function (data) {
-            console.log("/getBlog.do请求error");
-            console.log(data);
-        }
-    });
-
-});
-
-
-function GetQueryString(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) return unescape(r[2]);
-    return null;
-}

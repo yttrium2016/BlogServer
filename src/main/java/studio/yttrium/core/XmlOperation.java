@@ -1,4 +1,4 @@
-package studio.yttrium.utils;
+package studio.yttrium.core;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -7,9 +7,11 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.junit.Test;
 import studio.yttrium.constant.ConstantValue;
 import studio.yttrium.pojo.Blog;
+import studio.yttrium.utils.ConfigUtils;
+import studio.yttrium.utils.FileUtils;
+import studio.yttrium.utils.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,41 +26,27 @@ import java.util.*;
  * Date: 2017/9/27
  * Time: 22:17
  */
-public class XmlUtils {
+public class XmlOperation {
 
+    private static XmlOperation application = null;
     //操作的工具类
     private static SAXReader reader = new SAXReader();
 
-
-    @Test
-    public void test() {
-
-        long a = System.currentTimeMillis();
-
-        List<Blog> blogs = new ArrayList<>();
-
-        for (int i = 4000; i < 6000; i++) {
-            Blog blog = new Blog();
-            blog.setTitle("标题"+i);
-            blog.setUrl("aa");
-            blog.setFileName("name"+i);
-            blog.setTime(StringUtils.getNewDate("yyyy-MM-dd"));
-            blog.setAuthor(ConfigUtils.getString(ConstantValue.BLOG_AUTHOR, "未知"));
-            blog.setContent("没有简介");
-            blog.setWebUrl("");
-            blogs.add(blog);
-        }
-
-        saveBlogs(blogs);
-        long b = System.currentTimeMillis();
-
-        System.out.println("时间:"+(b-a));
+    private XmlOperation() {
     }
+
+    public static XmlOperation getApplication() {
+        if (application == null) {
+            application = new XmlOperation();
+        }
+        return application;
+    }
+
 
     /**
      * 没有的话建立一个
      */
-    private static void initXml() {
+    private void initXml() {
         File file = new File(ConstantValue.getXmlPath());
         if (!file.exists()) {
             Document document = DocumentHelper.createDocument();
@@ -78,7 +66,7 @@ public class XmlUtils {
      *
      * @param document
      */
-    public static void writerXmlFile(Document document) {
+    public void writerXmlFile(Document document) {
         //输出格式
         OutputFormat format = OutputFormat.createPrettyPrint();
         //设置编码
@@ -102,7 +90,7 @@ public class XmlUtils {
      * @param title
      * @param url
      */
-    public static void addNavItem(String title, String url) {
+    public void addNavItem(String title, String url) {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -135,7 +123,7 @@ public class XmlUtils {
      *
      * @param uuid
      */
-    public static void delNavItem(String uuid) {
+    public void delNavItem(String uuid) {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -169,7 +157,7 @@ public class XmlUtils {
      * @param blogName
      * @return
      */
-    public static boolean checkBlogName(String blogName) {
+    public boolean checkBlogName(String blogName) {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -201,7 +189,7 @@ public class XmlUtils {
      *
      * @param b
      */
-    public static void addBlogItem(Blog b) {
+    public void addBlogItem(Blog b) {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -252,7 +240,7 @@ public class XmlUtils {
      *
      * @param uuid
      */
-    public static void delBlogItem(String uuid) {
+    public void delBlogItem(String uuid) {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -285,7 +273,7 @@ public class XmlUtils {
      *
      * @param delFile
      */
-    public static void delBlogItem(File delFile) {
+    public void delBlogItem(File delFile) {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -318,7 +306,7 @@ public class XmlUtils {
      *
      * @param names
      */
-    public static void deleteBlogNotInNames(List<String> names) {
+    public void deleteBlogNotInNames(List<String> names) {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -346,15 +334,15 @@ public class XmlUtils {
     /**
      * 初始化xml中的博客列表
      */
-    public static void initXmlBlog() {
+    public void initXmlBlog() {
 
-        List<String> fileNames = FileUtils.getFileNames(new File(ConstantValue.getGitPath()));
+        List<String> fileNames = FileUtils.getFileNames(new File(ConstantValue.getBlogPath()));
 
         //删除原来有的已经被删除的根据名字(好像不用的)
         deleteBlogNotInNames(fileNames);
 
         //保存数据
-        saveBlogs(BlogUtils.getBlogsByFileNames(fileNames));
+        saveBlogList(getBlogListByFileNames(fileNames));
     }
 
     /**
@@ -362,7 +350,7 @@ public class XmlUtils {
      *
      * @return
      */
-    public static List<Blog> getBlogList(int index, int size) {
+    public List<Blog> getBlogList(int index, int size) {
 
         try {
             File file = new File(ConstantValue.getXmlPath());
@@ -390,6 +378,7 @@ public class XmlUtils {
                     blog.setWebUrl(item.elementText("webUrl"));
                     blog.setAuthor(item.elementText("author"));
                     blog.setFileName(item.elementText("fileName"));
+                    blog.setSuffix(item.elementText("suffix"));
                     blogList.add(blog);
                 }
             }
@@ -408,7 +397,7 @@ public class XmlUtils {
      *
      * @return
      */
-    public static List<Map<String, String>> getNavList() {
+    public List<Map<String, String>> getNavList() {
 
         try {
             File file = new File(ConstantValue.getXmlPath());
@@ -447,7 +436,7 @@ public class XmlUtils {
      *
      * @param blogs
      */
-    public static void saveBlogs(List<Blog> blogs) {
+    public void saveBlogList(List<Blog> blogs) {
         if (blogs != null && blogs.size() > 0) {
             try {
                 File file = new File(ConstantValue.getXmlPath());
@@ -460,7 +449,7 @@ public class XmlUtils {
 
                 Element blogData = rootElement.element("blogData");
                 Blog b = null;
-                for (int i= 0;i<blogs.size();i++){
+                for (int i = 0; i < blogs.size(); i++) {
                     b = blogs.get(i);
                     if (checkBlogName(b.getFileName())) {
 
@@ -477,6 +466,9 @@ public class XmlUtils {
                         //url
                         Element url = blog.addElement("url");
                         url.setText(b.getUrl());
+                        //suffix
+                        Element suffix = blog.addElement("suffix");
+                        suffix.setText(b.getSuffix());
                         //time
                         Element time = blog.addElement("time");
                         time.setText(b.getTime());
@@ -506,7 +498,7 @@ public class XmlUtils {
      * @param uuid
      * @return
      */
-    public static Blog getBlog(String uuid) {
+    public Blog getBlog(String uuid) {
         Blog blog = new Blog();
         try {
             File file = new File(ConstantValue.getXmlPath());
@@ -530,6 +522,7 @@ public class XmlUtils {
                     blog.setWebUrl(item.elementText("webUrl"));
                     blog.setAuthor(item.elementText("author"));
                     blog.setFileName(item.elementText("fileName"));
+                    blog.setSuffix(item.elementText("suffix"));
                     return blog;
                 }
             }
@@ -542,9 +535,10 @@ public class XmlUtils {
 
     /**
      * 获取所有Blog的个数
+     *
      * @return
      */
-    public static int getBlogCount() {
+    public int getBlogCount() {
         try {
             File file = new File(ConstantValue.getXmlPath());
             if (!file.exists()) {
@@ -570,5 +564,67 @@ public class XmlUtils {
             System.out.println("读取所有Blog数目失败" + e.getMessage());
             return 0;
         }
+    }
+
+    /**
+     * 通过文件名字获取BlogList
+     *
+     * @param fileNames
+     * @return
+     */
+    public static List<Blog> getBlogListByFileNames(List<String> fileNames) {
+
+        String url = "/blog.shtml?id=";
+
+        List<Blog> blogs = new ArrayList<>();
+        if (fileNames != null && fileNames.size() > 0) {
+            for (String str : fileNames) {
+                if (StringUtils.isNotBlank(str)) {
+                    Blog blog = new Blog();
+                    String suffix = str.indexOf(".") != -1 ? str.substring(str.lastIndexOf("."), str.length()) : null;
+                    str = str.substring(0, str.indexOf(".") != -1 ? str.lastIndexOf(".") : str.length());
+                    String[] split = str.split("--");
+                    switch (split.length) {
+                        case 1:
+                            blog.setTitle(split[0]);
+                            blog.setUrl(url);
+                            blog.setFileName(str + suffix);
+                            blog.setTime(StringUtils.getNewDate("yyyy-MM-dd"));
+                            blog.setAuthor(ConfigUtils.getString(ConstantValue.BLOG_AUTHOR, "未知"));
+                            blog.setContent("没有简介");
+                            break;
+                        case 2:
+                            blog.setTime(split[0]);
+                            blog.setTitle(split[1]);
+                            blog.setUrl(url);
+                            blog.setFileName(str + suffix);
+                            blog.setAuthor(ConfigUtils.getString(ConstantValue.BLOG_AUTHOR, "未知"));
+                            blog.setContent("没有简介");
+                            break;
+                        case 3:
+                            blog.setTime(split[0]);
+                            blog.setTitle(split[1]);
+                            blog.setUrl(url);
+                            blog.setFileName(str + suffix);
+                            blog.setAuthor(split[2]);
+                            blog.setContent("没有简介");
+                            break;
+                        case 4:
+                            blog.setTime(split[0]);
+                            blog.setTitle(split[1]);
+                            blog.setUrl(url);
+                            blog.setFileName(str + suffix);
+                            blog.setAuthor(split[2]);
+                            blog.setContent(split[3]);
+                            break;
+                    }
+                    blog.setWebUrl("");
+                    blog.setSuffix(suffix);
+                    blogs.add(blog);
+                }
+            }
+            return blogs;
+        }
+        return null;
     }
 }
