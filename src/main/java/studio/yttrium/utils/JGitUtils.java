@@ -49,8 +49,7 @@ public class JGitUtils {
         } catch (IOException e) {
             System.out.println("本地仓库不存在" + e.getMessage());
             e.printStackTrace();
-            new RuntimeException(e);
-            return null;
+            throw new RuntimeException(e);
         }
         return git;
     }
@@ -106,7 +105,7 @@ public class JGitUtils {
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("下载仓库出错" + e.getMessage());
-            new RuntimeException(e);
+            throw new RuntimeException(e);
         } finally {
             if (git != null) {
                 git.close();
@@ -129,8 +128,7 @@ public class JGitUtils {
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git add " + fileName + "失败" + e.getMessage());
-            new RuntimeException(e);
-            return false;
+            throw new RuntimeException(e);
         }
     }
 
@@ -150,8 +148,7 @@ public class JGitUtils {
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git commit " + message + "失败" + e.getMessage());
-            new RuntimeException(e);
-            return false;
+            throw new RuntimeException(e);
         }
 
     }
@@ -171,8 +168,7 @@ public class JGitUtils {
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git rm " + fileName + "失败" + e.getMessage());
-            new RuntimeException(e);
-            return false;
+            throw new RuntimeException(e);
         }
     }
 
@@ -193,8 +189,7 @@ public class JGitUtils {
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git push 失败" + e.getMessage());
-            new RuntimeException(e);
-            return false;
+            throw new RuntimeException(e);
         }
     }
 
@@ -211,8 +206,7 @@ public class JGitUtils {
         } catch (GitAPIException e) {
             e.printStackTrace();
             System.out.println("git checkout 失败" + e.getMessage());
-            new RuntimeException(e);
-            return false;
+            throw new RuntimeException(e);
         }
     }
 
